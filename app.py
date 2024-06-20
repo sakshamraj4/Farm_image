@@ -3,23 +3,22 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 import json
-import datetime
 from datetime import datetime, timedelta
 import numpy as np
-
+from urllib.parse import unquote
 
 # App code
 def load_data(file_path):
     data = pd.read_csv(file_path)
     data['Date'] = pd.to_datetime(data['Date'], dayfirst=True)
     return data
-    
+
 def safe_json_loads(json_str):
     try:
         return json.loads(json_str)
     except json.JSONDecodeError:
         return None
-        
+
 def extract_levels(json_data, level_name):
     if json_data:
         for item in json_data:
@@ -30,13 +29,6 @@ def extract_levels(json_data, level_name):
 def filter_farms(data):
     return data['farmName'].unique()
 
-def extract_levels(json_data, field_name):
-    if isinstance(json_data, list):
-        for item in json_data:
-            if isinstance(item, dict) and item.get('name') == field_name:
-                return item.get('value')
-    return None
-    
 def display_farm_info(data, farm_name):
     farm_data = data[data['farmName'] == farm_name]
     for index, row in farm_data.iterrows():
@@ -57,14 +49,13 @@ def display_farm_info(data, farm_name):
             st.write('##### Activity Date')
             st.write(row['Date'])
 
-
 st.set_page_config(layout="wide")
 st.title("Farm Information Dashboard")
 uploaded_file = "https://raw.githubusercontent.com/sakshamraj4/abinbev/main/test1.csv"
-    
+
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
-        
+
     if 'json data' not in data.columns:
         st.error("The 'json data' column is not present in the uploaded file.")
     else:
@@ -74,17 +65,28 @@ if uploaded_file is not None:
         data['Severity'] = data['json_data'].apply(lambda x: extract_levels(x, 'Severity'))
 
         farms = filter_farms(data)
-        selected_farm = st.sidebar.selectbox("Select Farm", farms)
 
-            
+        query_params = st.experimental_get_query_params()
+        farm_name_param = query_params.get('farm_name', [None])[0]
+        if farm_name_param:
+            farm_name_param = unquote(farm_name_param)
+            st.write(f"Decoded farm_name_param: {farm_name_param}")  # Debugging line
+
+        if farm_name_param and farm_name_param in farms:
+            default_index = list(farms).index(farm_name_param)
+            st.write(f"Default index for farm_name_param: {default_index}")  # Debugging line
+        else:
+            default_index = 0
+
+        selected_farm = st.sidebar.selectbox("Select Farm", farms, index=default_index)
+
         severity_levels = ['Select All'] + list(data['Severity'].dropna().unique())
         selected_severity = st.sidebar.selectbox("Severity", severity_levels)
 
         if selected_farm:
-            if selected_farm:
-                if selected_severity == 'Select All':
-                    filtered_data = data[data['farmName'] == selected_farm]
-                else:
-                    filtered_data = data[(data['farmName'] == selected_farm) & (data['Severity'] == selected_severity)]
-        
-        display_farm_info(filtered_data, selected_farm)       
+            if selected_severity == 'Select All':
+                filtered_data = data[data['farmName'] == selected_farm]
+            else:
+                filtered_data = data[(data['farmName'] == selected_farm) & (data['Severity'] == selected_severity)]
+
+            display_farm_info(filtered_data, selected_farm)
