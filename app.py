@@ -70,13 +70,11 @@ if uploaded_file is not None:
             farm_name_param = unquote(farm_name_param)
             st.write(f"Decoded farm_name_param: {farm_name_param}")  # Debugging line
 
-        if severity_param:
+        if farm_name_param and severity_param:
             severity_param = unquote(severity_param)
+            farm_name_param = unquote(farm_name_param)
             st.write(f"Decoded severity_param: {severity_param}")  # Debugging line
-
-        if farm_name_param and farm_name_param in farms:
-            default_farm_index = list(farms).index(farm_name_param)
-            st.write(f"Default index for farm_name_param: {default_farm_index}")  # Debugging line
+            
         else:
             default_farm_index = 0
 
@@ -84,11 +82,6 @@ if uploaded_file is not None:
 
         severity_levels = ['Select All'] + list(data['Severity'].dropna().unique())
 
-        if severity_param and severity_param in severity_levels:
-            default_severity_index = severity_levels.index(severity_param)
-            st.write(f"Default index for severity_param: {default_severity_index}")  # Debugging line
-        else:
-            default_severity_index = 0
 
         # Move the severity selectbox outside the condition to ensure it is always displayed correctly
         selected_severity = st.sidebar.selectbox("Severity", severity_levels, index=default_severity_index)
