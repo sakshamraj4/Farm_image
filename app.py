@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import plotly.figure_factory as ff
 import json
+from datetime import datetime, timedelta
+import numpy as np
 from urllib.parse import unquote
 
 # App code
@@ -64,27 +68,20 @@ if uploaded_file is not None:
 
         query_params = st.experimental_get_query_params()
         farm_name_param = query_params.get('farm_name', [None])[0]
-        severity_param = query_params.get('Severity', [None])[0]
-
         if farm_name_param:
             farm_name_param = unquote(farm_name_param)
             st.write(f"Decoded farm_name_param: {farm_name_param}")  # Debugging line
 
-        if farm_name_param and severity_param:
-            severity_param = unquote(severity_param)
-            farm_name_param = unquote(farm_name_param)
-            st.write(f"Decoded severity_param: {severity_param}")  # Debugging line
-            
+        if farm_name_param and farm_name_param in farms:
+            default_index = list(farms).index(farm_name_param)
+            st.write(f"Default index for farm_name_param: {default_index}")  # Debugging line
         else:
-            default_farm_index = 0
+            default_index = 0
 
-        selected_farm = st.sidebar.selectbox("Select Farm", farms, index=default_farm_index)
+        selected_farm = st.sidebar.selectbox("Select Farm", farms, index=default_index)
 
         severity_levels = ['Select All'] + list(data['Severity'].dropna().unique())
-
-
-        # Move the severity selectbox outside the condition to ensure it is always displayed correctly
-        selected_severity = st.sidebar.selectbox("Severity", severity_levels, index=default_severity_index)
+        selected_severity = st.sidebar.selectbox("Severity", severity_levels)
 
         if selected_farm:
             if selected_severity == 'Select All':
