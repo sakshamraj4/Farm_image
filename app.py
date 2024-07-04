@@ -86,9 +86,11 @@ if uploaded_file is not None:
 
         if severity_param and severity_param in severity_levels:
             default_severity_index = severity_levels.index(severity_param)
+            selected_severity = severity_levels[default_severity_index]
             st.write(f"Default index for severity_param: {default_severity_index}")  # Debugging line
         else:
             default_severity_index = 0
+            selected_severity = severity_levels[default_severity_index]
 
         selected_severity = st.sidebar.selectbox("Severity", severity_levels, index=default_severity_index)
 
