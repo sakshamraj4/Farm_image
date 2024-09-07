@@ -33,14 +33,20 @@ def download_image(url, filename):
     try:
         img_response = requests.get(url)
         img_response.raise_for_status()  # Check if the request was successful
+        
         img = Image.open(BytesIO(img_response.content))
+        
+        # Determine the image format
+        img_format = img.format if img.format else 'JPEG'
+        if img_format not in ['JPEG', 'PNG', 'GIF']:
+            img_format = 'JPEG'
+        
         buf = BytesIO()
-        img.save(buf, format="JPEG")
+        img.save(buf, format=img_format)
         return buf.getvalue(), filename
-    except (requests.exceptions.RequestException, UnidentifiedImageError):
-        # Skip the image if an error occurs
+    except (requests.exceptions.RequestException, UnidentifiedImageError) as e:
+        st.error(f"Error downloading or processing image: {e}")
         return None, None
-
 def display_farm_info(data, farm_name):
     images_to_download = []
     
