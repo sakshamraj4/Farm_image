@@ -28,9 +28,6 @@ def filter_farms(data):
     return sorted(data['farmName'].unique())
 
 def exact_string_match(farm_name_param, farms):
-    """
-    Performs exact string matching for farm names
-    """
     farm_name_param = farm_name_param.strip().lower()
     for farm in farms:
         if farm.strip().lower() == farm_name_param:
@@ -156,7 +153,6 @@ def main():
             default_farm_index = farms.index(matched_farm)
             st.success(f"Showing data for farm: {matched_farm}")
         else:
-            st.warning(f"Farm '{farm_name_param}' not found. Showing default farm.")
             default_farm_index = 0
     else:
         default_farm_index = 0
